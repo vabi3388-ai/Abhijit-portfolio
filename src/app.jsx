@@ -72,10 +72,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-neutral-800 dark:text-zinc-100 transition-colors duration-500 font-sans">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-zinc-950 text-neutral-800 dark:text-zinc-100 transition-colors duration-500 font-sans">
 
       {/* Background Graphic Grid */}
-      <div className="fixed inset-0 pointer-events-none -z-50 bg-zinc-50 dark:bg-zinc-950 transition-colors duration-500">
+      <div className="fixed inset-0 pointer-events-none -z-50 bg-white dark:bg-zinc-950 transition-colors duration-500">
         <div className="absolute inset-0 bg-grid-cyber opacity-100" />
         <div className="absolute inset-0 bg-dot-cyber opacity-80" />
       </div>

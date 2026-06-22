@@ -198,7 +198,7 @@ export default function ContactSection() {
                 href="https://www.linkedin.com/in/abhijit-v-3a05a9359/?lipi=urn%3Ali%3Apage%3Ad_flagship3_feed%3B2DD8%2FuGKR0CJcrECHXTpSg%3D%3D"
                 target="_blank"
                 rel="noreferrer noopener"
-                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-sky-502 hover:bg-sky-600 text-white font-mono text-xs font-bold transition-all shadow-md active:scale-95 group"
+                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-blue-700 hover:bg-blue-800 text-white font-mono text-xs font-bold transition-all shadow-md shadow-blue-500/20 active:scale-95 group"
               >
                 <LinkedinIcon className="h-4 w-4" />
                 LINKEDIN

@@ -74,9 +74,9 @@ export default function Header({
             aria-label="Toggle Theme"
           >
             {darkMode ? (
-              <Sun className="h-5 w-5 text-amber-400 transition-transform group-hover:scale-110" />
-            ) : (
               <Moon className="h-5 w-5 text-indigo-600 transition-transform group-hover:scale-110" />
+            ) : (
+              <Sun className="h-5 w-5 text-amber-400 transition-transform group-hover:scale-110" />
             )}
           </button>
 

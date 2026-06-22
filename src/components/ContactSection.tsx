@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Mail, Phone, MapPin, Linkedin as LinkedinIcon, Github as GithubIcon, Send, AlertTriangle, CheckCircle, ArrowRight } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  LinkedinIcon,
+  GithubIcon,
+  Send,
+  AlertTriangle,
+  CheckCircle,
+  Loader,
+} from "lucide-react";
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({
@@ -10,6 +20,9 @@ export default function ContactSection() {
 
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -22,12 +35,12 @@ export default function ContactSection() {
     setSuccessMsg("");
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const { name, email, description } = formData;
 
-    // 1. Emptiness Check
+    // ============ FRONTEND VALIDATION ============
     if (!name.trim()) {
       setErrorMsg("Validation Failed: Please submit your Name. It cannot be empty.");
       return;
@@ -37,30 +50,79 @@ export default function ContactSection() {
       return;
     }
 
-    // 2. Name contains numbers validation
+    // Name contains numbers validation
     const hasNumbers = /[0-9]/.test(name);
     if (hasNumbers) {
       setErrorMsg("Validation Failed: The name should not contain any numbers.");
       return;
     }
 
-    // 3. Email validation
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setErrorMsg("Validation Failed: Please enter a valid email address.");
       return;
     }
 
-    // 4. Success State Update
-    setSuccessMsg("your response has been updated");
-    setErrorMsg("");
+    if (!description.trim()) {
+      setErrorMsg("Validation Failed: Please enter your project description.");
+      return;
+    }
 
-    // Reset fields
-    setFormData({
-      name: "",
-      email: "",
-      description: "",
-    });
+    if (description.trim().length < 10) {
+      setErrorMsg("Validation Failed: Description must be at least 10 characters.");
+      return;
+    }
+
+    // ============ SEND TO BACKEND ============
+    setIsLoading(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          description: description.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send message");
+      }
+
+      // ============ SUCCESS ============
+      setSuccessMsg("✅ Your message has been sent successfully! We'll get back to you soon.");
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        description: "",
+      });
+
+      // Auto-clear success message after 5 seconds
+      setTimeout(() => {
+        setSuccessMsg("");
+      }, 5000);
+
+    } catch (error) {
+      console.error("Submission error:", error);
+      setErrorMsg(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while sending your message. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -73,7 +135,7 @@ export default function ContactSection() {
       {/* Section Header */}
       <div className="flex flex-col mb-12 relative z-10" id="contact_title_block">
         <div className="flex items-center gap-2 mb-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-red-550" />
+          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
           <h2 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-red-600 dark:text-red-400">
             05 / Communication Nodes
           </h2>
@@ -90,7 +152,7 @@ export default function ContactSection() {
           <div className="p-6 md:p-8 rounded-3xl bg-zinc-900/5 dark:bg-zinc-900/40 border border-neutral-200/60 dark:border-neutral-800/80 backdrop-blur-md flex flex-col justify-between gap-6 h-full">
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-mono text-red-650 font-black tracking-widest">TRANSMISSION DIRECTORY</span>
+              <span className="text-[10px] font-mono text-red-600 font-black tracking-widest">TRANSMISSION DIRECTORY</span>
               <h4 className="font-display font-black text-lg text-neutral-800 dark:text-white uppercase">
                 Access Channels
               </h4>
@@ -127,7 +189,7 @@ export default function ContactSection() {
               {/* Phone Card */}
               <a
                 href="tel:9840549063"
-                className="flex items-center gap-4 p-4 rounded-2xl bg-white/50 dark:bg-zinc-950/45 border border-neutral-100 dark:border-neutral-900 shadow-sm hover:border-red-505/20 transition-all group"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-white/50 dark:bg-zinc-950/45 border border-neutral-100 dark:border-neutral-900 shadow-sm hover:border-red-500/20 transition-all group"
               >
                 <div className="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 group-hover:bg-red-500/20 transition-colors">
                   <Phone className="h-4.5 w-4.5 animate-pulse" />
@@ -146,7 +208,7 @@ export default function ContactSection() {
                 href="https://www.linkedin.com/in/abhijit-v-3a05a9359/?lipi=urn%3Ali%3Apage%3Ad_flagship3_feed%3B2DD8%2FuGKR0CJcrECHXTpSg%3D%3D"
                 target="_blank"
                 rel="noreferrer noopener"
-                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-sky-502 hover:bg-sky-600 text-white font-mono text-xs font-bold transition-all shadow-md active:scale-95 group"
+                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-mono text-xs font-bold transition-all shadow-md active:scale-95 group"
               >
                 <LinkedinIcon className="h-4 w-4" />
                 LINKEDIN
@@ -210,7 +272,8 @@ export default function ContactSection() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Insert name (characters only, no numbers)..."
-                  className="w-full px-4 py-3 rounded-xl bg-neutral-50 dark:bg-zinc-950/50 border border-neutral-200 dark:border-neutral-800/80 text-neutral-800 dark:text-white focus:outline-none focus:border-red-500/70 focus:ring-1 focus:ring-red-500/50 transition-all font-sans text-sm"
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 rounded-xl bg-neutral-50 dark:bg-zinc-950/50 border border-neutral-200 dark:border-neutral-800/80 text-neutral-800 dark:text-white focus:outline-none focus:border-red-500/70 focus:ring-1 focus:ring-red-500/50 transition-all font-sans text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -225,7 +288,8 @@ export default function ContactSection() {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="Insert email (e.g. user@domain.com)..."
-                  className="w-full px-4 py-3 rounded-xl bg-neutral-50 dark:bg-zinc-950/50 border border-neutral-200 dark:border-neutral-800/80 text-neutral-800 dark:text-white focus:outline-none focus:border-red-500/70 focus:ring-1 focus:ring-red-500/50 transition-all font-sans text-sm"
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 rounded-xl bg-neutral-50 dark:bg-zinc-950/50 border border-neutral-200 dark:border-neutral-800/80 text-neutral-800 dark:text-white focus:outline-none focus:border-red-500/70 focus:ring-1 focus:ring-red-500/50 transition-all font-sans text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -239,18 +303,28 @@ export default function ContactSection() {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
+                  disabled={isLoading}
                   placeholder="Detail the project requirement scope, stack rules, or timeline benchmarks..."
-                  className="w-full px-4 py-3 rounded-xl bg-neutral-50 dark:bg-zinc-950/50 border border-neutral-200 dark:border-neutral-800/80 text-neutral-800 dark:text-white focus:outline-none focus:border-red-500/70 focus:ring-1 focus:ring-red-500/50 transition-all font-sans text-sm resize-none"
+                  className="w-full px-4 py-3 rounded-xl bg-neutral-50 dark:bg-zinc-950/50 border border-neutral-200 dark:border-neutral-800/80 text-neutral-800 dark:text-white focus:outline-none focus:border-red-500/70 focus:ring-1 focus:ring-red-500/50 transition-all font-sans text-sm resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
               <button
                 type="submit"
-                id="contact_submit_btn"
-                className="mt-2 w-full flex items-center justify-center gap-2 bg-red-650 hover:bg-red-750 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-red-500/10 transition-all hover:scale-[1.01] active:scale-95 group focus:outline-none focus:ring-2 focus:ring-red-500/55 uppercase tracking-widest text-xs"
+                disabled={isLoading}
+                className="mt-2 w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-500/50 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-red-500/10 transition-all hover:scale-[1.01] active:scale-95 group focus:outline-none focus:ring-2 focus:ring-red-500/55 uppercase tracking-widest text-xs"
               >
-                INITIATE TRANSMISSION
-                <Send className="h-3.5 w-3.5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
+                {isLoading ? (
+                  <>
+                    <Loader className="h-3.5 w-3.5 animate-spin" />
+                    TRANSMITTING...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-3.5 w-3.5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
+                    INITIATE TRANSMISSION
+                  </>
+                )}
               </button>
             </form>
 
